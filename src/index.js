@@ -1,15 +1,12 @@
-import Phaser from "phaser";
+import Phaser, { Game } from "phaser";
 import logoImg from "./assets/logo.png";
-
+import {GameScene} from "./scenes/game_scene";
 const config = {
   type: Phaser.AUTO,
   parent: "phaser-example",
   width: 800,
   height: 600,
-  scene: {
-    preload: preload,
-    create: create
-  }
+  scene: [GameScene]
 };
 
 const game = new Phaser.Game(config);
