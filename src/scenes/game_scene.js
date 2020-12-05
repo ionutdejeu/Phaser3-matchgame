@@ -25,11 +25,11 @@ export class GameScene extends Phaser.Scene
 
 
     tileMouseDownHandler(pointer,gameObject){
-        this.setTint(0xff0000);
         GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
     }
     tileMouseUpHandler(pointer,gameObject){
-         this.clearTint();
+        
+        
     }
     
     create(){
@@ -59,7 +59,7 @@ export class GameScene extends Phaser.Scene
                 
 
                 var tile = this.add.image(centerX + tx, centerY + ty, 'isoblocks2', block);
-               
+                
                 tile.setData('row', x);
                 tile.setData('col', y);
                 tile.setData('type',block);
