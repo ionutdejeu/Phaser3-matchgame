@@ -1,14 +1,15 @@
 import Phaser from "phaser";
 import allTiles_sheet from "../assets/allTiles_sheet.png";
 import {OutlinePipeline,OutlinePipeline_KEY} from '../pipelines/outline'
+import {GameManagerInstance,GameEvents,GameEventNames} from '../logic/game_manager'
 
-
+export const GameSkeneKey = 'GameScene';
 export class GameScene extends Phaser.Scene
 {
     constructor ()
     {
-        this.selectedTiles = [];
-        super();
+         
+        super({key:GameSkeneKey});
     }
 
     preload ()
@@ -24,12 +25,11 @@ export class GameScene extends Phaser.Scene
 
 
     tileMouseDownHandler(pointer,gameObject){
-        console.log(this);
         this.setTint(0xff0000);
+        GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
     }
     tileMouseUpHandler(pointer,gameObject){
-        console.log(this);
-        this.clearTint();
+         this.clearTint();
     }
     
     create(){

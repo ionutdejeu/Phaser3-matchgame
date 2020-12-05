@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import {EventObserver} from '../events/event_observer';
 
-const UiSceneKey = 'UIScene'
+export const UiSceneKey = 'UIScene'
 export const UiEventsNames={
     OpenMenu :"OpenMenu",
     CloseMenu:"CloseMenu",
@@ -12,7 +12,14 @@ export class UIScene extends Phaser.Scene
 {
     constructor ()
     {
-        this.selectedTiles = [];
-        super();
+        super({key:UiSceneKey});
+    }
+
+    create(){
+        UiEvents.on(UiEventsNames.OpenMenu,this.openNemuHandler);
+    }
+
+    openNemuHandler(params){
+
     }
 }
