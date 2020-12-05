@@ -7,6 +7,7 @@ export class GameScene extends Phaser.Scene
 {
     constructor ()
     {
+        this.selectedTiles = [];
         super();
     }
 
@@ -61,7 +62,7 @@ export class GameScene extends Phaser.Scene
                
                 tile.setData('row', x);
                 tile.setData('col', y);
-
+                tile.setData('type',block);
                 tile.setDepth(centerY + ty);
                 tile.setInteractive();
                 tile.on('pointerdown',this.tileMouseDownHandler);
