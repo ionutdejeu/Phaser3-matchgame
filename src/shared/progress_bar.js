@@ -1,19 +1,20 @@
 import Phaser from "phaser";
 
-export class ProgressBar {
+export class ProgressBar extends Phaser.GameObjects.Container {
     constructor (scene, x, y,rectangle)
     {
+        super(scene,x,y);
         this.bar = new Phaser.GameObjects.Graphics(scene);
         this.rectangle = rectangle;
         this.x = x;
         this.y = y;
         this.value = 100;
-        
         this.p = this.rectangle.width / 100;
-  
+
         this.draw();
   
-        scene.add.existing(this.bar);
+        this.add.existing(this.bar);
+        
     }
   
     decrease (amount)
@@ -26,7 +27,6 @@ export class ProgressBar {
         }
   
         this.draw();
-  
         return (this.value === 0);
     }
     setValue(amount){

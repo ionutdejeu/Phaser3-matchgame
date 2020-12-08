@@ -1,29 +1,16 @@
 import Phaser from "phaser";
-import allTiles_sheet from "../assets/allTiles_sheet.png";
-import {OutlinePipeline,OutlinePipeline_KEY} from '../pipelines/outline'
+
 import {GameManagerInstance,GameEvents,GameEventNames} from '../logic/game_manager'
 import {ScrollingCamera} from '../shared/scrolling_camera';
-
-export const GameSkeneKey = 'GameScene';
+import {UiSceneKey} from './ui_scene';
+export const GameSceneKey = 'GameScene';
 export class GameScene extends Phaser.Scene
 {
     constructor ()
     {
          
-        super({key:GameSkeneKey});
+        super({key:GameSceneKey});
     }
-
-    preload ()
-    {
-        if (this.game.renderer instanceof Phaser.Renderer.WebGL.WebGLRenderer) {
-            this.game.renderer.addPipeline(
-                OutlinePipeline_KEY,
-                new OutlinePipeline(this.game)
-            );
-        }        
-        this.load.spritesheet('isoblocks2', allTiles_sheet, { frameWidth: 112, frameHeight: 129 });
-    }
-
 
     tileMouseDownHandler(pointer,gameObject){
         GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
@@ -61,6 +48,8 @@ export class GameScene extends Phaser.Scene
     }
     
     create(){
+        
+        this.scene.launch(UiSceneKey);
 
         var frames = this.textures.get('isoblocks2').getFrameNames();
         console.log(frames)
