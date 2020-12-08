@@ -6,8 +6,9 @@ import {BootScene,BootSceneKey} from  "./scenes/boot";
 const config = {
   type: Phaser.AUTO,
   parent: "phaser-example",
-  width: 800,
-  height: 600,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  render: { pixelArt: true },
 };
 
 const game = new Phaser.Game(config);

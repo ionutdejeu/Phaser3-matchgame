@@ -1,8 +1,8 @@
-import Phaser from "phaser";
+import Phaser, { Game } from "phaser";
 
 import {GameManagerInstance,GameEvents,GameEventNames} from '../logic/game_manager'
 import {ScrollingCamera} from '../shared/scrolling_camera';
-import {UiSceneKey} from './ui_scene';
+import {UiEvents, UiEventsNames, UiSceneKey} from './ui_scene';
 export const GameSceneKey = 'GameScene';
 export class GameScene extends Phaser.Scene
 {
@@ -10,10 +10,12 @@ export class GameScene extends Phaser.Scene
     {
          
         super({key:GameSceneKey});
+        this.score = 0;
     }
 
     tileMouseDownHandler(pointer,gameObject){
         GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
+        
     }
     tileMouseUpHandler(pointer,gameObject){
         
@@ -46,26 +48,76 @@ export class GameScene extends Phaser.Scene
 
        return map
     }
-    
-    create(){
+    animateMatchFound(tilesArr){
+        this.emitter1.stop();
+        this.emitter2.stop();
+        this.emitter2.reserve(50);
+        this.emitter1.reserve(50);
         
+        this.emitter1.emitParticle(10,tilesArr[0].x,tilesArr[0].y);
+        this.emitter2.emitParticle(10,tilesArr[1].x,tilesArr[1].y);
+        this.match_pair_sound.play();
+        if(this.checkWindGameCondition())
+        {
+            console.log("WIN");
+        }
+
+    }
+
+    checkWindGameCondition(){
+        console.log(this.blocks);
+        for (var x = 0; x < this.blocks.length; x++)
+        {
+            if(this.blocks[x].active==true){
+                return false;
+            }
+        }
+        return true;
+    }
+   
+    create(){
+        GameEvents.on(GameEventNames.TilesMatchFound,this.animateMatchFound,this);
         this.scene.launch(UiSceneKey);
+        this.music = this.sound.add('backgroundmusic',{volume: 0.1});
+        this.match_pair_sound = this.sound.add('pop_sound');
+
+        this.music.loop = true; // This is what you are lookig for
+        if((!this.music.isPlaying)){
+            this.music.play();
+        }
+
+        //  First create a particle manager
+        //  A single manager can be responsible for multiple emitters
+        //  The manager also controls which particle texture is used by _all_ emitter
+        this.particles = this.add.particles('blue_particle');
+        var emitter_config = {
+            alpha: { start: 1, end: 0 },
+            scale: { start: 0.5, end: 3.5 },
+            speed: 40,
+            accelerationY: 300,
+            angle: { min: -85, max: -95 },
+            rotate: { min: -180, max: 180 },
+            lifespan: { min: 500, max: 700 },
+            blendMode: 'ADD',
+            frequency: 110,
+            maxParticles: 4,
+            on:false, // initally set to inactive;
+        }
+
 
         var frames = this.textures.get('isoblocks2').getFrameNames();
-        console.log(frames)
-        var mapWidth = 10;
-        var mapHeight = 10; 
+        var mapWidth = 15;
+        var mapHeight = 15; 
 
         var tileWidthHalf = 56;
         var tileHeightHalf = 64;
 
-        var centerX = (mapWidth / 2) * tileWidthHalf;
-        var centerY = -100;
+        var centerX = (mapWidth+1) * tileWidthHalf;
+        var centerY = tileHeightHalf;
 
-        var blocks = [];
+        this.blocks = [];
 
-        var map = this.createMap(frames,mapWidth,mapHeight);
-        console.log(map);
+        this.map = this.createMap(frames,mapWidth,mapHeight);
         for (var y = 0; y < mapHeight; y++)
         {
             for (var x = 0; x < mapWidth; x++)
@@ -74,18 +126,18 @@ export class GameScene extends Phaser.Scene
                 var ty = (x + y) * tileHeightHalf;
                 
                 
-                var tile = this.add.image(centerX + tx, centerY + ty, 'isoblocks2', map[y][x]);
+                var tile = this.add.image(centerX + tx, centerY + ty, 'isoblocks2', this.map[y][x]);
                 
                 tile.setData('row', x);
                 tile.setData('col', y);
-                tile.setData('type',map[y][x]);
-                
+                tile.setData('type',this.map[y][x]);
+
                 tile.setDepth(centerY + ty);
                 tile.setInteractive();
                 tile.on('pointerdown',this.tileMouseDownHandler);
                 tile.on('pointerup',this.tileMouseUpHandler);
                 
-                blocks.push(tile);
+                this.blocks.push(tile);
             }
         }
 
@@ -113,9 +165,15 @@ export class GameScene extends Phaser.Scene
         var camera = new ScrollingCamera(this,{
             x:0,
             y:0,
-            bottom:1000,
-            right:1000
+            bottom:(mapHeight+mapWidth)*tileHeightHalf,
+            right:(mapHeight+mapWidth)*tileHeightHalf
         });
+        this.particles.setDepth(10000);
+        this.emitter1 = this.particles.createEmitter(emitter_config);
+        this.emitter2 = this.particles.createEmitter(emitter_config);
+        console.log(this.emitter1,this.emitter2);
+        //this.emitter1.setDepth(10000);
+        //this.emitter2.setDepth(10001);
     }
     create2 ()
     {

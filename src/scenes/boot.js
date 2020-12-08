@@ -1,8 +1,12 @@
-export const BootSceneKey = 'bootscene'
 import allTiles_sheet from "../assets/allTiles_sheet.png";
+import background_music from '../assets/background_music.mp3';
+import pop from '../assets/pop.ogg';
+import blue from '../assets/blue.png';
+
 import {OutlinePipeline,OutlinePipeline_KEY} from '../pipelines/outline'
 import {GameSceneKey} from './game_scene';
 
+export const BootSceneKey = 'bootscene';
 export class BootScene extends Phaser.Scene
 {
     constructor ()
@@ -32,6 +36,12 @@ export class BootScene extends Phaser.Scene
             );
         }        
         this.load.spritesheet('isoblocks2', allTiles_sheet, { frameWidth: 112, frameHeight: 129 });
+        this.load.audio('backgroundmusic',background_music);
+        this.load.audio('pop_sound',pop);
+        this.load.image('blue_particle',blue);
+        
+        console.log(this);
+
         this.load.on('progress', this.updateBar, {newGraphics:this.newGraphics,loadingText:loadingText});
         this.load.on('complete', this.complete, {scene:this.scene});
     }
