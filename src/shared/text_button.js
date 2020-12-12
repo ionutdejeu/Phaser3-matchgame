@@ -6,8 +6,8 @@ export default class TextButton extends Phaser.GameObjects.Container{
     constructor(scene,posX,posY,label,onClickCallbakc){
         super(scene,posX,posY);
         this.textGameObject = this.scene.make.text({
-            x: posX,
-            y: posY,
+            x: 0,
+            y: 0,
             text: label,
             origin: { x: 0.5, y: 0.5 },
             align:'center',
@@ -32,10 +32,11 @@ export default class TextButton extends Phaser.GameObjects.Container{
         this.textGameObject.setDepth(100);
         this.textGameObject.on('pointerdown', function (event) {
             this.setTint(0xff0000);
-            if(callback!=null)callback();
+            if(onClickCallbakc!=null)onClickCallbakc();
         });    
         this.textGameObject.on('pointerout', function (event) {
             this.clearTint();
         });
+        this.add(this.textGameObject);
     }   
 }

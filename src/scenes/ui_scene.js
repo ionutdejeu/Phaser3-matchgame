@@ -1,13 +1,14 @@
 import Phaser from "phaser";
 import {EventObserver} from '../events/event_observer';
 import {GameEvents,GameEventNames} from '../logic/game_manager'
-import {TextButton} from '../shared/text_button';
+import TextButton from '../shared/text_button';
 
 export const UiSceneKey = 'UIScene'
 export const UiEventsNames={
     OpenMenu :"OpenMenu",
     CloseMenu:"CloseMenu",
-    ScoreChanged:"ScoreChanged"
+    ScoreChanged:"ScoreChanged",
+    OnGameWinUIEnable:"OnGameWinUIEnable"
 };
 export const UiEvents = new Phaser.Events.EventEmitter();
 
@@ -19,13 +20,11 @@ export class UIScene extends Phaser.Scene
         this.textGameObject = null;
     }
 
-    create(){
-        UiEvents.on(UiEventsNames.OpenMenu,this.openNemuHandler);
-        UiEvents.on(UiEventsNames.ScoreChanged,this.onScoreChangedHanler,this);
-        this.textGameObject = this.make.text({
-            x: 100,
-            y: 20,
-            text: "Score: 0",
+    createText(x,y,label){
+        return this.make.text({
+            x: x,
+            y: y,
+            text: label,
             origin: { x: 0.5, y: 0.5 },
             align:'center',
             color: '#fff',
@@ -42,14 +41,54 @@ export class UIScene extends Phaser.Scene
             style: {
                 font: 'bold 25px Arial',
                 fill: '#2E85FF',
-                wordWrap: { width: 300 },
-        
+                wordWrap: { width: 500 },
             }
         });
-        //this.restart = new TextButton(this,this.game.)
+    }
+    create(){
+        UiEvents.on(UiEventsNames.OpenMenu,this.openNemuHandler);
+        UiEvents.on(UiEventsNames.ScoreChanged,this.onScoreChangedHanler,this);
+        UiEvents.on(UiEventsNames.OnGameWinUIEnable,this.onWinGameHandler,this);
+        this.textGameObject = this.createText(100,50,"Score: 0");
+        
+    
+        var w = this.game.canvas.width;
+        var h = this.game.canvas.height;
+        var x = w*.25;
+        var y = h*.25;
+        var wpannel = w*0.5;
+        var hpannel = h*0.5;
+
+        this.successScreenContainer = this.add.container(x, y);
+        
+        this.successPannel = {
+            backgrounGraphics:  this.add.graphics(),
+            txtTitle:this.createText(wpannel/2,hpannel/5,"Congratulations! You win !"),
+            txtYourScore:this.createText(wpannel/2,hpannel/5*2,"Your score is:"),
+            btnRestart:new TextButton(this,wpannel/2,hpannel/5*4,"Click to restart level ",this.onRetryBtnDownHandler)
+        };
+        this.successPannel.backgrounGraphics.fillStyle(0xffff00, 1);
+        this.successPannel.backgrounGraphics.fillRoundedRect(0,0,wpannel,hpannel);
+        this.successPannel.backgrounGraphics.fillStyle(0xff00ff, 1);
+        
+        for (const [key, value] of Object.entries(this.successPannel)) {
+            this.successScreenContainer.add(value);
+        }
+        
+        this.successScreenContainer.setActive(false);
+        this.successScreenContainer.setVisible(false); 
+
+    }
+    onWinGameHandler(finalScore){
+        this.successPannel.txtYourScore.text = "Your final score is: "+finalScore;
+        this.successScreenContainer.setActive(true);
+        this.successScreenContainer.setVisible(true); 
     }
     openNemuHandler(params){
 
+    }
+    onRetryBtnDownHandler(param){
+        GameEvents.emit(GameEventNames.RestartGame,param);
     }
     onScoreChangedHanler(score){
         this.textGameObject.text = "Score: "+score;

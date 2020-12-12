@@ -4,7 +4,8 @@ export const GameEventNames={
     WinGame :"Win",
     CloseMenu:"TimeUp",
     TileSelected:"TileSelected",
-    TilesMatchFound:"TilesMatchFound"
+    TilesMatchFound:"TilesMatchFound",
+    RestartGame:"RestarGameEvent"
 };
 export const GameEvents = new Phaser.Events.EventEmitter();
 class GameStateManger{
@@ -56,15 +57,15 @@ class GameStateManger{
         
         
     }
-
     checkMatch(tile1,tile2){
         return tile1.getData('type') === tile2.getData('type') && 
         (tile1.getData('row') != tile2.getData('row') ||
         tile1.getData('col') != tile2.getData('col'))
     }
 
-    onGameWin(){
-
+    onGameWin(params){
+        console.log("Win",params);
+        UiEvents.emit(UiEventsNames.OnGameWinUIEnable,this.score);
     }
 }
 const GameManagerInstance = new GameStateManger();

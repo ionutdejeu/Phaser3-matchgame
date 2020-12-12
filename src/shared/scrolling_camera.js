@@ -93,7 +93,7 @@ export class ScrollingCamera extends Phaser.Cameras.Scene2D.Camera {
     }
 
     destroy() {
-        this.emit(Events.DESTROY, this);
+        //this.emit(Events.DESTROY, this);
         
         this.removeAllListeners();
         this.matrix.destroy();

@@ -10,22 +10,24 @@ export class GameScene extends Phaser.Scene
     {
          
         super({key:GameSceneKey});
-        this.score = 0;
     }
 
     tileMouseDownHandler(pointer,gameObject){
-        GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
-        
+        this.selectedTile = this;
     }
     tileMouseUpHandler(pointer,gameObject){
-        
-        
+        if(this.selectedTile === this){    
+            GameEvents.emit(GameEventNames.TileSelected,[pointer,this]);
+        }
     }
     createMap(blocks,width,height){
         var map = []
         //pick random 
         var totalCount = width*height;
-      
+        
+        if(totalCount%2 == 1){
+            totalCount-=1;
+        }
         var chosenFrames = [];
         for(let i = totalCount/2;i>0;i--){
            var randFrame = parseInt(Math.random()*blocks.length);
@@ -59,7 +61,7 @@ export class GameScene extends Phaser.Scene
         this.match_pair_sound.play();
         if(this.checkWindGameCondition())
         {
-            console.log("WIN");
+            GameEvents.emit(GameEventNames.WinGame,{});
         }
 
     }
@@ -75,8 +77,14 @@ export class GameScene extends Phaser.Scene
         return true;
     }
    
+    restarGameHandler(){
+        console.log("Restart");
+        this.stop();
+        this.scene.restart();
+    }
     create(){
         GameEvents.on(GameEventNames.TilesMatchFound,this.animateMatchFound,this);
+        GameEvents.on(GameEventNames.RestartGame,this.restarGameHandler,this);
         this.scene.launch(UiSceneKey);
         this.music = this.sound.add('backgroundmusic',{volume: 0.1});
         this.match_pair_sound = this.sound.add('pop_sound');
@@ -106,8 +114,8 @@ export class GameScene extends Phaser.Scene
 
 
         var frames = this.textures.get('isoblocks2').getFrameNames();
-        var mapWidth = 15;
-        var mapHeight = 15; 
+        var mapWidth = 10;
+        var mapHeight = 10; 
 
         var tileWidthHalf = 56;
         var tileHeightHalf = 64;
@@ -134,31 +142,13 @@ export class GameScene extends Phaser.Scene
 
                 tile.setDepth(centerY + ty);
                 tile.setInteractive();
-                tile.on('pointerdown',this.tileMouseDownHandler);
                 tile.on('pointerup',this.tileMouseUpHandler);
-                
+                tile.on('pointerdown',this.tileMouseDownHandler);
                 this.blocks.push(tile);
             }
         }
 
-        const cursors = this.input.keyboard.createCursorKeys();
-
-        const controlConfig = {
-            camera: this.cameras.main,
-            left: cursors.left,
-            right: cursors.right,
-            zoomIn: cursors.up,
-            zoomOut: cursors.down,
-            acceleration: 0.04,
-            drag: 0.0005,
-            maxSpeed: 0.7
-        };
-
-        this.controls = new Phaser.Cameras.Controls.SmoothedKeyControl(controlConfig);
-
-        this.cameras.main.zoom = 0.62;
-        this.cameras.main.scrollX = -110;
-
+       
         //limit the camera to the size of our map
         //this.cameras.main.setBounds(0, 0, this.map.widthInPixels * 4, this.map.heightInPixels * 4);
         this.cameras.remove(this.cameras.main);
@@ -172,8 +162,7 @@ export class GameScene extends Phaser.Scene
         this.emitter1 = this.particles.createEmitter(emitter_config);
         this.emitter2 = this.particles.createEmitter(emitter_config);
         console.log(this.emitter1,this.emitter2);
-        //this.emitter1.setDepth(10000);
-        //this.emitter2.setDepth(10001);
+        
     }
     create2 ()
     {
@@ -259,10 +248,12 @@ export class GameScene extends Phaser.Scene
 
         this.cameras.main.zoom = 0.62;
         this.cameras.main.scrollX = -110;
-    }
+    }  
 
-    update (time, delta)
-    {
-        this.controls.update(delta);
+    stop(){
+        this.music.stop();
+         this.music.destroy();
+        this.match_pair_sound.stop();
+         this.match_pair_sound.destroy(); 
     }
 }
